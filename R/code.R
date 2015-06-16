@@ -196,19 +196,25 @@ setwd(file.path(file_dir,"result"))
 	#Creating datatable from intensity and names 
 	vplot   = aggregate(int ~ virus, FUN = mean) 
 	vplotsd = aggregate(int ~ virus, FUN = sd) 
-	
+#print(virus)
+#print(cvirus)
+plottis = aggregate(int ~ cvirus + virus, FUN = mean) 
+
+
 	#Creating png file for barplot	
 	png(paste(file_org,"2.png"),width = 450, height = 300, bg='transparent')
 	
 	#Colors for bars type
-	vplot$Colour="lightgrey"
-	vplot$Colour[vplot$int>=min.neg]				=	"red"
-	vplot$Colour[vplot$virus=="Biotin-Marke_2,5uM"]	=	"dodgerblue"
-	vplot$Colour[vplot$virus=="neg-"]				=	"dodgerblue"
-	vplot$Colour[vplot$virus=="plant_18S"]			=	"dodgerblue"
-	vplot$Colour[vplot$virus=="Spotting_Puffer"]	=	"dodgerblue" 
-	vplot$Colour[vplot$virus=="SP-rbcL"]			=	"dodgerblue"
-	
+plottis$Colour="lightgrey"
+plottis$Colour[plottis$int>=min.neg]				=	"red"
+plottis$Colour[plottis$virus=="Biotin-Marke_2,5uM"]	=	"dodgerblue"
+plottis$Colour[plottis$virus=="neg-"]				=	"dodgerblue"
+plottis$Colour[plottis$virus=="plant_18S"]			=	"dodgerblue"
+plottis$Colour[plottis$virus=="Spotting_Puffer"]	=	"dodgerblue" 
+plottis$Colour[plottis$virus=="SP-rbcL"]			=	"dodgerblue"
+
+write.table(plottis, file= file.path(file_dir,"result",paste(file_org,"-plottis1.csv", sep='')), sep=",", row.names=F)
+
 	#Creating error bar function
 	error.bar <- function(x, y, upper, lower=upper, length=0.1,...){
 				if(length(x) != length(y) | length(y) !=length(lower) | length(lower) != length(upper))
@@ -229,6 +235,8 @@ setwd(file.path(file_dir,"result"))
 
 	#Creating datatable from intensity and names 
 	cvplot   = aggregate(int ~ cvirus, FUN = mean) 
+#print(cvplot)
+write.table(t(cvplot), file= file.path(file_dir,"result",paste(file_org,"-plot.csv", sep='')), sep=",", row.names=F)
 
 	#Creating png file for barplot	
 	png(paste(file_org,".png"),width = 950, height = 600, bg='transparent')
