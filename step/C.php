@@ -36,21 +36,6 @@
 		
 	include "../function/imagecreatefromfile.php"; 
 
-		//$coords = exec ("R --vanilla --slave '--args " . $_GET['photo'] . " " . $photo_dir . "' < /var/www/clondiag/R/recutlnx.R");
-		// $coord	= preg_split("/\s+/", $coords); 
-		
-		// if(count($coord)==5){	
-		
-			// $src_image	= $dir_thmb . "output.jpg";
-			// $src0 		= $dir_thmb . $_GET['photo']; 		
-				
-			// $img_r 	= imagecreatefromfile($src_image);
-			// $dst_r 	= ImageCreateTrueColor($coord[1],$coord[2]);
-
-			// imagecopyresized($dst_r,$img_r,0,0,$coord[3],$coord[4],$coord[1],$coord[2],$coord[1],$coord[2]);
-			// imagejpeg($dst_r,$src0);
-		// }
-
 	$result   	= exec ("R --vanilla --slave '--args " . $_GET['photo'] . " " . $photo_dir . " " . $size_array . " " . $proj_dir ." " . $currentProject ."' < /var/www/clondiag/R/code.R");
 ?>
 
@@ -267,23 +252,23 @@
 								</table>
 							</td>
 							<td>
-								<form action="D.php" method="post">
-									<input type="hidden" id="photo" name="photo" value="<?php echo $_GET['photo']; ?>"/>
-								</form><br>
-								<a href="#" onclick="return light();"><p style="text-align: left;"><input id="squidheadlink" type="submit" value="+ Controls" class="btn btn-large btn-inverse" /></p></a>
+							<link rel="stylesheet" href="/clondiag/css/barplot.css" type="text/css" >
+							
+							<script src="http://d3js.org/d3.v3.min.js"></script>
+							<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+							<script src="/clondiag/js/graph.js"></script> 	
+							<script>
+								var photo = "<?php echo $_GET['photo']; ?>";
+								draw(photo + "-splot.csv",350);
+								draw(photo + "-cplot.csv",600);
+							</script>
+							<a href="#" onclick="return light();"><p style="text-align: left;"><input id="squidheadlink" type="submit" value="+ Controls" class="btn btn-large btn-inverse" /></p></a>
 							</td>
 						</tr>
 					</table>
 					<?php
 						$dir_c	= "/clondiag/projects/$currentProject/$currentTest/result/"; 
-						
-						echo "<br>";
-						echo "<img src=\"". $dir_c .$_GET['photo']." 2.png\" width=\"900\"\">";
-						echo "<br>";
-						echo "<img src=\"". $dir_c .$_GET['photo']." .png\" width=\"900\"\">";
-						
-						include "../includes/footer.php";
-						
+										
 						$myStaticHtml = ob_get_clean();
 						
 						$forstart		= "<?php  
@@ -299,14 +284,19 @@
 											} else {
 												echo '<script language=\"javascript\">top.location.href=\"/clondiag/login.php\"</script>';
 											} ?>
+											
+											
+											
 											";
 
 						$fp = fopen($dir_result."result.php","w");  
 						fwrite($fp,$forstart);  
 						fwrite($fp,$myStaticHtml);  
 						fclose($fp); 
-						   
+						
 						echo "<script language=\"javascript\">top.location.href=\"/clondiag/projects/".$currentProject."/".$currentTest."/result/result.php\"</script>";
+						include "../includes/footer.php";   
+						
 					?>
 				</div>
 			</div>
