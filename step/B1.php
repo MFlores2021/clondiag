@@ -80,7 +80,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 		<link href="../css/flexnav.css" rel="stylesheet" type="text/css" media="all" />
-		<script src="raphael.js"></script>
+		<script src="../js/raphael.js"></script>
 		<script type="text/javascript">
 			function loadImage(width,height){
 				var src = document.getElementById("bee").src,

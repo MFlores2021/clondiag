@@ -88,6 +88,7 @@ Author: MFlores (CIP)
 											<th>Date</th>
 											<th>Read</th>
 											<th>Owner</th>
+											<th>Project</th>
 											<th>Del</th>
 										</tr>
 									</thead>

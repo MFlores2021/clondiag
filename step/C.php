@@ -1,8 +1,8 @@
 <?php
 
 	ob_start();
-	include_once "/var/www/clondiag/conn/conn.php";
-	include_once "/var/www/clondiag/function/checkpermission.php";
+	include_once "../conn/conn.php";
+	include_once "../function/checkpermission.php";
 
 	if(!isset($_SESSION)) {
 		session_start();
@@ -23,6 +23,10 @@
 	$dir_d				= "/clondiag/projects/$currentProject/$currentTest/"; 
 	$dir_thmb			= $dir_c . "thumbnail/";
 	$dir_result			= $dir_c . "result/";
+
+	if (!file_exists($dir_thmb . $_GET['photo'])) {
+		copy($dir_c . "files/" . $_GET['photo'],$dir_thmb . $_GET['photo']); 
+	} 
 	$dir_result1		= $dir_d . "result/";
 	$dir_book			= "../projects/$currentProject/" . $currentBook ;
 	$dir_book1			= "../projects/$currentProject/";
@@ -33,10 +37,12 @@
 	$photo_		=	 $dir_thmb . $_GET['photo']; 			
 	$photo_dir =  "/var/www/clondiag/projects/$currentProject/$currentTest/";
 	$proj_dir =  "/var/www/clondiag/projects/$currentProject/";
-		
+
 	include "../function/imagecreatefromfile.php"; 
 
 	$result   	= exec ("R --vanilla --slave '--args " . $_GET['photo'] . " " . $photo_dir . " " . $size_array . " " . $proj_dir ." " . $currentProject ."' < /var/www/clondiag/R/code.R");
+
+
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -52,10 +58,20 @@
 	<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
 	<link href="/clondiag/css/style.css" rel="stylesheet" type="text/css" media="all" />
 	<link rel="shortcut icon" type="image/x-icon" href="../images/favicon.ico" />
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 	<link href="/clondiag/css/flexnav.css" rel="stylesheet" type="text/css" media="all" />
 
+	<script type='text/javascript' language='javascript' src='/clondiag/js/jquery.dataTables.js'></script>
+		<script type='text/javascript' charset='utf-8'>
+		$(document).ready(function() {
+			oTable = $('#example').dataTable({
+				'aaSorting': [ [0,'desc']],
+				'iDisplayLength': 25,
+				'aLengthMenu': [[25, 50, 100, -1], [25, 50, 100, 'All']],
+				'bJQueryUI': true
+			});
+		} );
+	</script>
 	<style type='text/css' title='currentStyle'>
 			@import '/clondiag/css/demo_page.css';
 			@import '/clondiag/css/demo_table_jui.css';
@@ -128,59 +144,22 @@
 					<script src="/clondiag/js/jquery.tipTip.minified.js"></script> 
 					<map id="Mapa" name="Mapa">
 					<?php
-						$fila = 0;
-						if (($gestor = fopen($dir_result .$_GET['photo']."-int.csv", "r")) !== FALSE) {
+						// Read results to create maplinks
+						$cont = 0;
+						if (($gestor = fopen($dir_result .$_GET['photo']."-desv.csv", "r")) !== FALSE) {
 							while (($datos = fgetcsv($gestor, 1000, ",")) !== FALSE) {
-								$numero = count($datos);
-								$fila++;
-								for ($c=0; $c < $numero; $c++) {
-									$valor[$fila][$c+1] = $datos[$c];
-								}		
+									$int[$cont] = $datos[0];
+									$bool[$cont] = $datos[1];
+									$cname[$cont] = $datos[2]; 
+									$cont++; 
 							}
-							fclose($gestor);
-						}
-
-						$fila2 = $size_array -2 ; $fila2x = -1; $cont = 0;
-
-						if (($gestor2 = fopen($dir_book, "r")) !== FALSE) {
-							while (($datos2 = fgetcsv($gestor2, 1000, ",")) !== FALSE) {
-								$numero2 = count($datos2);										
-								
-								while ( $datos2[0] > $cont && $datos2[0] != "ID" &&  $fila2 > -2){										
-									$valor2[$fila2+1][$fila2x] = "NA"; 
-									
-									if($fila2x >$size_array-2){
-										$fila2x = -1;	 $fila2--; 	 
-									}
-										$fila2x++; $cont++;
-								}
-								$valor2[$fila2+1][$fila2x] = $datos2[1];
-								$names[$cont] = $datos2[1];
-								
-								if($fila2x > $size_array -2){
-									$fila2x = -1;	 $fila2--; 	 
-								}
-								$fila2x++; 	$cont++;
-							}
-							fclose($gestor2);								
+							fclose($gestor); 
 						}
 						else { echo "nothing"; }
 
-						$fila3 = 0;
-						if (($gestor3 = fopen($dir_result .$_GET['photo']."-pos.csv", "r")) !== FALSE) {
-							while (($datos3 = fgetcsv($gestor3, 1000, ",")) !== FALSE) {
-								$numero3 = count($datos3);
-								$fila3++;
-								
-								for ($c3=0; $c3 < $numero3; $c3++) {
-								 $valor3[$fila3][$c3+1] = $datos3[$c3];		
-								}		
-							}
-							fclose($gestor3);
-						}
-
-						$count=1; $a= 0;
-						for ($j = 0; $j < $size_array; $j++){
+						///para crear la rejilla
+						$count=1;  
+						for ($j = $size_array -1 ; $j > -1; $j--){
 							$yIni	=	$dy *  $j;
 							$yFin	=	$dy * ($j + 1);
 							
@@ -188,29 +167,24 @@
 								$xIni	=	$dx *  $i;
 								$xFin	=	$dx * ($i + 1);
 
-								if ($valor3[$j+2][$i+1] == "TRUE"){
-									$tablavirus2[$count] = $valor2[$j][$i];
-									$name = "squidhead" . $tablavirus2[$count] . $count;
-								} else {
-									$name = "squid" . $valor2[$j][$i].count;
-								}
+								if ($bool[$count] == 1){	$name = "squidhead" . $cname[$count] . $count; } 
+								else {	$name = "squid" . $cname[$count] . $count; }
+
 								$name = str_replace(' ', '_', $name);
 
-								if ( $valor2[$j][$i]  != "NA"){
-									echo "<area id=\"".$name."\" alt=\"" . $valor2[$j][$i] . "\" shape=\"poly\" coords=\"". $xIni .",". $yIni .","  . $xIni .",".$yFin.","  .$xFin.",".$yFin.",".$xFin.",".$yIni."\" href=\"#\" class=\"map\" style=\"position: absolute\" usemap=\"#Mapa\" title=\" Infected = " . $valor3[$j+2][$i+1] . " <br> Value = ".$valor[$j+2][$i+1]."  <br> Virus: " . $valor2[$j][$i] . " \">";
-									#echo $name." -". $valor2[$j][$i]." coords=". $xIni .",". $yIni .","  . $xIni .",".$yFin.","  .$xFin.",".$yFin.",".$xFin.",".$yIni ."Infected = " . $valor3[$j+2][$i+1] . " Value = ".$valor[$j+2][$i+1]." Virus: " . $valor2[$j][$i] ;
+								if ( $cname[$count] != "NA"){
+							//	echo (boolval($bool[$count])? 'TRUE' : 'FALSE'); 
+	
+									echo "<area id=\"".$name."\" alt=\"" . $cname[$count] . "\" shape=\"poly\" coords=\"". $xIni .",". $yIni .","  . $xIni .",".$yFin.","  .$xFin.",".$yFin.",".$xFin.",".$yIni."\" href=\"#\" class=\"map\" style=\"position: absolute\" usemap=\"#Mapa\" title=\" Infected = " . ($bool[$count]) . " <br> Value = " . $int[$count] ."  <br> Virus: " . $cname[$count] . " \">";
 								}
-								$count=$count+1;
-							}
-						}
+								$count=$count+1; 
+							} 
+						} 
 					?>
 					</map>
 				</div>
 				<?php
-					$nameslist	= file_get_contents($dir_book1."names.txt");
-					$tablavirus2= str_replace(' ', '_', $tablavirus2);
-					$names 		= str_replace(' ', '_', $names);
-					$resulta 	= exec ("R --vanilla --slave '--args " . $_GET['photo'] . " " . implode("@",$tablavirus2).$nameslist . " " . $photo_dir . " " . implode("@",$names) . "' < /var/www/clondiag/R/code2.R");
+
 					$fila4 = 0;
 					
 					if (($gestor4 = fopen($dir_result .$_GET['photo']."-mm.csv", "r")) !== FALSE) {
@@ -224,15 +198,19 @@
 							}
 						}
 						fclose($gestor4);
-					}
+					}  
 				?>
 				<div>
 					<table>
 						<tr>
 							<td>
-								<table class="CSSTableGenerator">
-									<tr><td>Virus</td><td>Frec.</td></tr>
+								<div class="clear">
+								<div class='demo_jui'>	
+								<table cellpadding='0' cellspacing='0' border='0' class='display' id='example'>
+									<thead><tr><th>Virus</th><th>Frec.</th></tr></thead>
+									<tbody>
 									<?php
+										#To build table
 										for ($k = 1; $k < $fila4; $k++){
 											$color = 'black';
 											
@@ -247,20 +225,21 @@
 											echo "<a id=\"similarlink" . $valor4[$k+1][1] . "\" href=\"#\"><font color='".$color."'>" . $valor4[$k+1][1] . "</font></a><br>";
 											//echo "<a id=\"similarlink" . $valor4[$k+1][1] . "\" onmouseover=\"light('" . $valor4[$k+1][1] . "');\" href=\"#\"><font color='".$color."'>" . $valor4[$k+1][1] . "</font></a><br>";
 											echo "</td><td><font color='".$color."'>" . $valor4[$k+1][2] ."/" . $valor4[$k+1][3] ."</font></td></tr>"; //
-										}
+										}  
 									?>
+									</tbody>
 								</table>
+								</div></div>
 							</td>
 							<td>
 							<link rel="stylesheet" href="/clondiag/css/barplot.css" type="text/css" >
 							
-							<script src="http://d3js.org/d3.v3.min.js"></script>
-							<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+							<script src="//d3js.org/d3.v4.min.js"></script>
+							<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.0/d3-tip.min.js"></script> 	
 							<script src="/clondiag/js/graph.js"></script> 	
 							<script>
 								var photo = "<?php echo $_GET['photo']; ?>";
 								draw(photo + "-splot.csv",350);
-								draw(photo + "-cplot.csv",600);
 							</script>
 							<a href="#" onclick="return light();"><p style="text-align: left;"><input id="squidheadlink" type="submit" value="+ Controls" class="btn btn-large btn-inverse" /></p></a>
 							</td>
@@ -268,7 +247,7 @@
 					</table>
 					<?php
 						$dir_c	= "/clondiag/projects/$currentProject/$currentTest/result/"; 
-										
+										 
 						$myStaticHtml = ob_get_clean();
 						
 						$forstart		= "<?php  

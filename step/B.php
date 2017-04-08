@@ -143,7 +143,7 @@
 									$screen		=	$_GET['screen'];
 									
 									echo "<tr><td width=\"".$_width."\" style=\"text-align:center\">";
-									echo "<img src=\"" . $photo . "\" id=\"cropbox\" width=\"" . $x_sixe . "\" height=\"" .$y_sixe . "\"/>";
+									echo "<img src=\"" . $photo . "\" id=\"cropbox\" width=\"" . $x_sixe . "\" height=auto/>";
 									echo "</td></tr>";	
 							?>
 									</table>
@@ -194,7 +194,7 @@
 									$screen		=	$_POST['screen'];
 									
 									echo "<tr><td width=\"". $_width ."\" style=\"text-align:center\">";
-									echo "<img src=\"" . $photo_ . "\" id=\"cropbox\" width=\"" . $x_sixe . "\" height=\"" .$y_sixe_ . "\"/>";
+									echo "<img src=\"" . $photo_ . "\" id=\"cropbox\" width=\"" . $x_sixe . "\" height=auto/>";
 									echo "</td></tr>";
 							?>
 									</table>
@@ -238,8 +238,8 @@
 											</td>
 											<td width="25%">
 												<form action="C.php" method="get">
-													<input type="hidden" id="screen" name="screen" value="<?php echo $_POST['screen']; ?>" />
-													<input type="hidden" id="photo" name="photo" value="<?php echo $_POST['photo']; ?>"/>
+													<input type="hidden" id="screen" name="screen" value="<?php echo $screen; ?>" />
+													<input type="hidden" id="photo" name="photo" value="<?php echo $name_p; ?>"/>
 													<br/>		
 													<p style="text-align: center;"><input type="submit" value="Run" class="btn btn-large btn-inverse"/></p>
 												</form>

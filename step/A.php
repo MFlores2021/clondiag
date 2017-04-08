@@ -1,6 +1,6 @@
 <?php
-include_once "/var/www/clondiag/conn/conn.php";
-include_once "/var/www/clondiag/function/checkpermission.php";
+include_once "../conn/conn.php";
+include_once "../function/checkpermission.php";
 
 	if(!isset($_SESSION)) {
 		session_start();
